@@ -1,11 +1,11 @@
 # main.py
 import pygame
 
-from settings import SET
-from ui import Button, draw_text, draw_panel
-from save import load_save, write_save
-from upgrades import UPGRADE_DEFS, upgrade_cost, buy_upgrade, apply_run_modifiers
-from game import Game
+from src.settings import SET
+from src.ui import Button, draw_text, draw_panel
+from src.save import load_save, write_save
+from src.upgrades import UPGRADE_DEFS, upgrade_cost, buy_upgrade, apply_run_modifiers
+from src.game import Game
 
 STATE_MENU = "menu"
 STATE_UPGRADES = "upgrades"
