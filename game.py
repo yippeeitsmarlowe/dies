@@ -475,7 +475,7 @@ class Game:
         if self.over:
             earned = self.compute_coins_earned()
             if self.doom >= 1.0:
-                msg1 = "DOOM OVERFLOW!"
+                msg1 = "YOU LOSE!"
             else:
                 msg1 = "TIME UP!"
             msg2 = f"Final score: {self.score}"

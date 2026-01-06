@@ -14,21 +14,29 @@ DEFAULT_SAVE = {
     }
 }
 
+# save.py
+import json
+
+SAVE_PATH = "save.json"
+
+DEFAULT_SAVE = {
+    "coins": 0,
+    "upgrades": {
+        "extra_time": 0,
+        "score_mult": 0,
+        "reroll": 0,
+        "color_count_minus": 0,
+    }
+}
+
 def load_save():
-    if not os.path.exists(SAVE_PATH):
-        return DEFAULT_SAVE.copy()
-    try:
-        with open(SAVE_PATH, "r", encoding="utf-8") as f:
-            data = json.load(f)
-        # fill missing keys
-        merged = DEFAULT_SAVE.copy()
-        merged.update({k: data.get(k, merged[k]) for k in merged.keys()})
-        merged["upgrades"] = DEFAULT_SAVE["upgrades"].copy()
-        merged["upgrades"].update(data.get("upgrades", {}))
-        return merged
-    except Exception:
-        return DEFAULT_SAVE.copy()
+    # ALWAYS reset on boot
+    data = DEFAULT_SAVE.copy()
+    data["upgrades"] = DEFAULT_SAVE["upgrades"].copy()
+    write_save(data)
+    return data
 
 def write_save(data):
     with open(SAVE_PATH, "w", encoding="utf-8") as f:
         json.dump(data, f, indent=2)
+

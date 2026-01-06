@@ -1,9 +1,9 @@
 {
-  "coins": 9624,
+  "coins": 8,
   "upgrades": {
-    "extra_time": 10,
-    "score_mult": 10,
-    "reroll": 5,
-    "color_count_minus": 2
+    "extra_time": 0,
+    "score_mult": 0,
+    "reroll": 0,
+    "color_count_minus": 0
   }
 }

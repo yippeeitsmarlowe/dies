@@ -11,12 +11,14 @@ STATE_MENU = "menu"
 STATE_UPGRADES = "upgrades"
 STATE_GAME = "game"
 
+
 def make_fonts():
     return {
         "title": pygame.font.SysFont("arialblack", 34),
         "ui": pygame.font.SysFont("arial", 24, bold=True),
         "small": pygame.font.SysFont("arial", 18),
     }
+
 
 def main():
     pygame.init()
@@ -30,6 +32,9 @@ def main():
     state = STATE_MENU
     game = None
 
+    CENTER_X = SET.WIDTH // 2
+
+    # ---------- Navigation ----------
     def start_game():
         nonlocal state, game, save_data
         time_limit, score_mult, colors, rerolls = apply_run_modifiers(SET, save_data["upgrades"])
@@ -49,33 +54,73 @@ def main():
         nonlocal state
         state = STATE_UPGRADES
 
-    # Buttons for menu
+    # ---------- Menu Buttons ----------
     menu_buttons = []
+
     def rebuild_menu_buttons():
         nonlocal menu_buttons
         menu_buttons = []
-        bx, by, bw, bh, gap = 330, 240, 240, 58, 16
-        menu_buttons.append(Button((bx, by, bw, bh), "Play", fonts["ui"], on_click=start_game))
-        menu_buttons.append(Button((bx, by + (bh+gap), bw, bh), "Upgrades", fonts["ui"], on_click=go_upgrades))
-        menu_buttons.append(Button((bx, by + 2*(bh+gap), bw, bh), "Quit", fonts["ui"], on_click=lambda: pygame.event.post(pygame.event.Event(pygame.QUIT))))
+
+        bw, bh, gap = 320, 66, 18
+        start_y = 265
+
+        labels = [
+            ("Play", start_game),
+            ("Upgrades", go_upgrades),
+            ("Quit", lambda: pygame.event.post(pygame.event.Event(pygame.QUIT))),
+        ]
+
+        for i, (text, action) in enumerate(labels):
+            rect = pygame.Rect(0, 0, bw, bh)
+            rect.center = (CENTER_X, start_y + i * (bh + gap))
+            menu_buttons.append(Button(rect, text, fonts["ui"], on_click=action))
 
     rebuild_menu_buttons()
 
+    # ---------- Screens ----------
     def draw_menu():
         screen.fill((18, 18, 24))
-        draw_text(screen, "Match-3 Shapes", fonts["title"], 270, 120)
-        draw_text(screen, f"Coins: {save_data['coins']}", fonts["ui"], 380, 175)
+
+        # Title
+        title_surf = fonts["title"].render("Match-3 Shapes", True, (245, 245, 255))
+        title_rect = title_surf.get_rect(center=(CENTER_X, 150))
+        screen.blit(title_surf, title_rect)
+
+        # Coins
+        coins_surf = fonts["ui"].render(f"Coins: {save_data['coins']}", True, (220, 220, 235))
+        coins_rect = coins_surf.get_rect(center=(CENTER_X, 200))
+        screen.blit(coins_surf, coins_rect)
+
+        # Buttons
         for b in menu_buttons:
             b.draw(screen)
-        draw_text(screen, "Tip: Bigger matches award bonus score.", fonts["small"], 305, 470, (210, 210, 225))
-        draw_text(screen, "Earn 1 coin per 100 score.", fonts["small"], 328, 495, (210, 210, 225))
+
+        # Tips
+        tip_lines = [
+            "Tip: Bigger matches award bonus score.",
+            "Earn 1 coin per 100 score.",
+        ]
+        y = 545
+        for line in tip_lines:
+            tip_surf = fonts["small"].render(line, True, (200, 200, 215))
+            tip_rect = tip_surf.get_rect(center=(CENTER_X, y))
+            screen.blit(tip_surf, tip_rect)
+            y += 26
 
     def draw_upgrades():
         screen.fill((18, 18, 24))
-        draw_text(screen, "Upgrades", fonts["title"], 360, 40)
-        draw_text(screen, f"Coins: {save_data['coins']}", fonts["ui"], 60, 100)
 
-        panel = pygame.Rect(50, 140, 800, 430)
+        # Title
+        title_surf = fonts["title"].render("Upgrades", True, (245, 245, 255))
+        title_rect = title_surf.get_rect(center=(CENTER_X, 70))
+        screen.blit(title_surf, title_rect)
+
+        # Coins
+        coins_surf = fonts["ui"].render(f"Coins: {save_data['coins']}", True, (220, 220, 235))
+        screen.blit(coins_surf, (60, 110))
+
+        # Panel
+        panel = pygame.Rect(50, 150, 800, 420)
         draw_panel(screen, panel)
 
         y = panel.y + 18
@@ -87,16 +132,21 @@ def main():
             name = f"{defn.name}  (Lv {lvl}/{defn.max_level})"
             draw_text(screen, name, fonts["ui"], panel.x + 18, y)
             draw_text(screen, defn.desc, fonts["small"], panel.x + 18, y + 30, (210, 210, 225))
+
             if maxed:
-                draw_text(screen, "MAXED", fonts["small"], panel.x + 640, y + 10, (245, 245, 255))
+                draw_text(screen, "MAXED", fonts["small"], panel.x + 650, y + 10, (245, 245, 255))
             else:
-                draw_text(screen, f"Cost: {cost}", fonts["small"], panel.x + 640, y + 10, (245, 245, 255))
+                draw_text(screen, f"Cost: {cost}", fonts["small"], panel.x + 650, y + 10, (245, 245, 255))
+
             y += 78
 
-        draw_text(screen, "Click an upgrade row to buy it. ESC to return.", fonts["small"], 60, 590, (210, 210, 225))
+        footer = "Click an upgrade row to buy it. ESC to return."
+        footer_surf = fonts["small"].render(footer, True, (210, 210, 225))
+        footer_rect = footer_surf.get_rect(center=(CENTER_X, 610))
+        screen.blit(footer_surf, footer_rect)
 
     def handle_upgrades_click(pos):
-        panel = pygame.Rect(50, 140, 800, 430)
+        panel = pygame.Rect(50, 150, 800, 420)
         if not panel.collidepoint(pos):
             return
         row_h = 78
@@ -107,6 +157,7 @@ def main():
             if buy_upgrade(save_data, defn):
                 write_save(save_data)
 
+    # ---------- Main Loop ----------
     running = True
     while running:
         dt = clock.tick(SET.FPS) / 1000.0
@@ -154,6 +205,7 @@ def main():
         pygame.display.flip()
 
     pygame.quit()
+
 
 if __name__ == "__main__":
     main()
