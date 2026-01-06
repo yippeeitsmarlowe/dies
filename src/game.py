@@ -3,10 +3,10 @@ import pygame
 from dataclasses import dataclass
 from typing import Dict, Tuple, Optional, Set, List
 
-from src.settings import SET
-from src.board import Board, draw_gem, Piece
-from src.ui import draw_panel, draw_text
-from src.utils import clamp
+from settings import SET
+from board import Board, draw_gem, Piece
+from ui import draw_panel, draw_text
+from utils import clamp
 
 Pos = Tuple[int, int]
 
